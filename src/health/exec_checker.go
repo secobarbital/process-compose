@@ -8,17 +8,18 @@ import (
 )
 
 type execChecker struct {
-	command    string
-	timeout    int
-	workingDir string
-	env        []string
+	command     string
+	timeout     int
+	workingDir  string
+	env         []string
+	shellConfig command.ShellConfig
 }
 
 func (c *execChecker) Status() (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeout)*time.Second)
 	defer cancel()
 
-	cmd := command.BuildCommandContext(ctx, c.command)
+	cmd := command.BuildCommandShellArgContext(ctx, c.shellConfig, c.command)
 	cmd.SetDir(c.workingDir)
 	cmd.SetEnv(c.env)
 

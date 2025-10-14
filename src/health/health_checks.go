@@ -10,6 +10,7 @@ import (
 	"github.com/InVisionApp/go-health/v2"
 	"github.com/InVisionApp/go-health/v2/checkers"
 	"github.com/rs/zerolog/log"
+	"github.com/f1bonacc1/process-compose/src/command"
 )
 
 const (
@@ -23,9 +24,10 @@ type Prober struct {
 	hc             *health.Health
 	stopped        atomic.Bool
 	env            []string
+	shellConfig    command.ShellConfig
 }
 
-func New(name string, probe Probe, env []string, onCheckEnd func(bool, bool, string, interface{})) (*Prober, error) {
+func New(name string, probe Probe, env []string, onCheckEnd func(bool, bool, string, interface{}), shellConfig command.ShellConfig) (*Prober, error) {
 	probe.ValidateAndSetDefaults()
 	p := &Prober{
 		probe:          probe,
@@ -33,6 +35,7 @@ func New(name string, probe Probe, env []string, onCheckEnd func(bool, bool, str
 		onCheckEndFunc: onCheckEnd,
 		hc:             health.New(),
 		env:            env,
+		shellConfig:    shellConfig,
 	}
 	p.hc.DisableLogging()
 	if probe.Exec != nil {
@@ -133,9 +136,10 @@ func (p *Prober) getHttpChecker() (health.ICheckable, error) {
 
 func (p *Prober) getExecChecker() (health.ICheckable, error) {
 	return &execChecker{
-		command:    p.probe.Exec.Command,
-		timeout:    p.probe.TimeoutSeconds,
-		workingDir: p.probe.Exec.WorkingDir,
-		env:        p.env,
+		command:     p.probe.Exec.Command,
+		timeout:     p.probe.TimeoutSeconds,
+		workingDir:  p.probe.Exec.WorkingDir,
+		env:         p.env,
+		shellConfig: p.shellConfig,
 	}, nil
 }

@@ -802,6 +802,7 @@ func (p *Process) setUpProbes() {
 			*p.procConf.LivenessProbe,
 			p.getProcessEnvironment(),
 			p.onLivenessCheckEnd,
+			p.shellConfig,
 		)
 		if err != nil {
 			log.Error().Msgf("failed to setup liveness probe for %s - %s", p.getName(), err.Error())
@@ -815,6 +816,7 @@ func (p *Process) setUpProbes() {
 			*p.procConf.ReadinessProbe,
 			p.getProcessEnvironment(),
 			p.onReadinessCheckEnd,
+			p.shellConfig,
 		)
 		if err != nil {
 			log.Error().Msgf("failed to setup readiness probe for %s - %s", p.getName(), err.Error())
